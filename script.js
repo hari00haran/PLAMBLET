@@ -1,168 +1,180 @@
-const  firstnameEl = document.querySelector("#firstname");
-const emailEl = document.querySelector('#email');
-const phonenumberEl = document.querySelector('#phonenumber');
-const messageEl = document.querySelector('#message1');
+const firstnameEl = document.querySelector("#firstname");
+const emailEl = document.querySelector("#email");
+const phonenumberEl = document.querySelector("#phonenumber");
+const messageEl = document.querySelector("#message1");
 const form = document.querySelector("#form1");
 
+// Required field validation
+const isRequired = (value) => value.trim() !== "";
 
+// Name length validation
+const isBetween = (length, min, max) =>
+    length >= min && length <= max;
 
+// Phone validation
+const isNumberValid = (phone) => /^[0-9]{10}$/.test(phone);
+
+// Email validation
+const isEmailValid = (email) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+// Show error
+const showError = (input, message) => {
+    const formfield = input.parentElement;
+
+    formfield.classList.remove("success");
+    formfield.classList.add("error");
+
+    const error = formfield.querySelector("small");
+
+    if (error) {
+        error.textContent = message;
+    }
+};
+
+// Show success
+const showSuccess = (input) => {
+    const formfield = input.parentElement;
+
+    formfield.classList.remove("error");
+    formfield.classList.add("success");
+
+    const error = formfield.querySelector("small");
+
+    if (error) {
+        error.textContent = "";
+    }
+};
+
+// Validate name
 const checkfirstname = () => {
-    let valid = false;
-
-    const min = 3,
-    max = 25;
-
     const firstname = firstnameEl.value.trim();
 
-    if(!isRequired(firstname)) {
-        showError(firstnameEl,'Firstname cannot be blank*.');
-    } else if (!isBetween(firstname.length, min, max)) {
-        showError(firstnameEl,`user firstname must be between ${min} and ${max} characters.*`)
-    } else {
-        showSuccess(firstnameEl);
-        valid = true;
-
+    if (!isRequired(firstname)) {
+        showError(firstnameEl, "Name cannot be blank.");
+        return false;
     }
-    return valid;
+
+    if (!isBetween(firstname.length, 3, 25)) {
+        showError(
+            firstnameEl,
+            "Name must be between 3 and 25 characters."
+        );
+        return false;
+    }
+
+    showSuccess(firstnameEl);
+    return true;
 };
 
-
-
+// Validate phone
 const checkphonenumber = () => {
-    let valid = false; 
+    const phone = phonenumberEl.value.trim();
 
-    const phonenumber = phonenumberEl.value.trim();
-    if(!isRequired(phonenumber)){
-        showError(phonenumberEl,'Number cannot be blank.*');
-    } else if(!isNumberValid(phonenumber)) {
-        showError(phonenumberEl, 'Number is not valid.*');
-    } else {
-        showSuccess(phonenumberEl);
-        valid = true;
+    if (!isRequired(phone)) {
+        showError(phonenumberEl, "Phone number cannot be blank.");
+        return false;
     }
 
-    return valid;
+    if (!isNumberValid(phone)) {
+        showError(
+            phonenumberEl,
+            "Enter a valid 10-digit phone number."
+        );
+        return false;
+    }
+
+    showSuccess(phonenumberEl);
+    return true;
 };
 
-
+// Validate email
 const checkEmail = () => {
-    let valid = false;
-
     const email = emailEl.value.trim();
-    if(!isRequired(email)) {
-        showError(emailEl, 'Email cannot be blank.');
-    } else if (!isEmailValid(email)) {
-        showError(emailEl, 'Email is not valid.')
-    } else {
-        showSuccess(emailEl);
-        valid = true;
+
+    if (!isRequired(email)) {
+        showError(emailEl, "Email cannot be blank.");
+        return false;
     }
-    return valid;
+
+    if (!isEmailValid(email)) {
+        showError(emailEl, "Enter a valid email address.");
+        return false;
+    }
+
+    showSuccess(emailEl);
+    return true;
 };
+
+// Validate message
 const checkMessage = () => {
-    let valid = false;
-
-
-
     const message = messageEl.value.trim();
-    if(message ==""){
-        showError(messageEl,'Message cannot be blank*.');
-    }else {
-        showSuccess(messageEl);
-        valid = true;
-}
-return valid;
+
+    if (!isRequired(message)) {
+        showError(messageEl, "Message cannot be blank.");
+        return false;
+    }
+
+    showSuccess(messageEl);
+    return true;
 };
 
-const isNumberValid = (phonenumber) => {
-    const re = /^[0-9]{10}$/;
-    return re.test(phonenumber);
-}
-const isEmailValid = (email) => {
-    const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-};
-const isRequired = value => value === '' ? false : true;
-const isBetween = (length, min, max) => length < min || length > max ? false : true;
-
-
-
-form.addEventListener('submit', function (e){
+// Submit form
+form.addEventListener("submit", function (e) {
     e.preventDefault();
 
-    let isfirstnameValid = checkfirstname(),
-        isNumberValid = checkphonenumber(),
-       isEmailValid = checkEmail(),
-       isMessageValid = checkMessage();
+    const isNameValid = checkfirstname();
+    const isPhoneValid = checkphonenumber();
+    const isEmailValidNow = checkEmail();
+    const isMessageValid = checkMessage();
 
-
-
-       let isFormValid = isfirstnameValid &&
-        isNumberValid && 
-        isEmailValid &&
+    const isFormValid =
+        isNameValid &&
+        isPhoneValid &&
+        isEmailValidNow &&
         isMessageValid;
 
-        if(isFormValid){
+    if (isFormValid) {
+        alert("All fields are valid!");
 
-        }
+        // Validation is complete.
+        // Email sending or backend integration
+        // must be added separately.
+    }
 });
 
+// Validate while typing
 const debounce = (fn, delay = 500) => {
     let timeoutId;
+
     return (...args) => {
-        
-        if (timeoutId) {
-            clearTimeout(timeoutId);
-        }
-        
+        clearTimeout(timeoutId);
+
         timeoutId = setTimeout(() => {
-            fn.apply(null, args)
+            fn.apply(null, args);
         }, delay);
     };
 };
 
+form.addEventListener(
+    "input",
+    debounce(function (e) {
+        switch (e.target.id) {
+            case "firstname":
+                checkfirstname();
+                break;
 
+            case "phonenumber":
+                checkphonenumber();
+                break;
 
-form.addEventListener('input',debounce(function (e){
-    switch (e.target.id) {
-        case 'firstname' :
-            checkfirstname();
-            break;
+            case "email":
+                checkEmail();
+                break;
 
-        case 'phonenumber' :
-
-            checkphonenumber();
-            break;
-        case 'email' :
-            checkEmail();
-            break;
-        case 'message1' :
-            checkMessage();
-            break;
-    }
-}));
-
-
-
-const showError = (input, message) =>{
-
-    const formfield = input.parentElement;
-
-    formfield.classList.remove('success');
-    formfield.classList.add('error');
-
-
-    const error = formfield.querySelector('small');
-    error.textContent = message;
-};
-
-
-const showSuccess = (input) => {
-    const formfield = input.parentElement;
-
-    formfield.classList.remove('error');
-    formfield.classList.add('success');
-
-    const error = formfield.querySelector('small');
-    error.textContent = '';
-}
+            case "message1":
+                checkMessage();
+                break;
+        }
+    })
+);
